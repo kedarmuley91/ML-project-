@@ -24,9 +24,6 @@ class DataTransformation:
         self.data_transformation_config = DataTransformationConfig()
 
     def get_data_transformer_object(self):
-        """
-        This function is responsible for data transformation
-        """
         try:
             numerical_columns = ["writing_score", "reading_score"]
             categorical_columns = [
@@ -46,7 +43,11 @@ class DataTransformation:
             cat_pipeline = Pipeline(
                 steps=[
                     ("imputer", SimpleImputer(strategy="most_frequent")),
-                    ("one_hot_encoder", OneHotEncoder()),
+                    (
+                        "one_hot_encoder",
+                        OneHotEncoder(handle_unknown="ignore", sparse_output=False)
+
+                    ),
                     ("scaler", StandardScaler(with_mean=False))
                 ]
             )
@@ -85,11 +86,21 @@ class DataTransformation:
 
             logging.info("Applying preprocessing object")
 
-            input_feature_train_arr = preprocessing_obj.fit_transform(input_feature_train_df)
-            input_feature_test_arr = preprocessing_obj.transform(input_feature_test_df)
+            input_feature_train_arr = preprocessing_obj.fit_transform(
+                input_feature_train_df
+            )
+            input_feature_test_arr = preprocessing_obj.transform(
+                input_feature_test_df
+            )
 
-            train_arr = np.c_[input_feature_train_arr, np.array(target_feature_train_df)]
-            test_arr = np.c_[input_feature_test_arr, np.array(target_feature_test_df)]
+            train_arr = np.c_[
+                input_feature_train_arr,
+                np.array(target_feature_train_df)
+            ]
+            test_arr = np.c_[
+                input_feature_test_arr,
+                np.array(target_feature_test_df)
+            ]
 
             save_object(
                 file_path=self.data_transformation_config.preprocessor_obj_file_path,
